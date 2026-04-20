@@ -75,6 +75,8 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
+If you add or change `.env.local` while the dev server is already running, restart `npm run dev` once so Next.js reloads the environment variables.
+
 ### Next.js 16 Note
 
 This repo explicitly sets `turbopack.root` in `next.config.ts` to `process.cwd()`.
