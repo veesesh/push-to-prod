@@ -17,17 +17,15 @@ Inside every company:
 
 Paste any internal communication — Slack thread, meeting notes, WhatsApp messages, transcript — and get back a structured action plan in seconds.
 
-**Claude** handles the intelligence:
+**Claude** (`claude-sonnet-4-6`) handles the intelligence:
 - Summary
-- Action items with owners
-- Deadlines
+- Action items with owners + deadlines
 - Blockers & risks
 - Follow-up email draft
 
 **Genspark** handles the presentation:
-- Pretty weekly report
-- Project tracker doc
-- Polished team update
+- Opens with a pre-filled executive update prompt
+- Clean project tracker doc, team update
 
 ---
 
@@ -56,104 +54,7 @@ Need investor update Monday.
 - Investor update due Monday — no owner assigned
 
 **Follow-up Email:**
-> Team, here are today's action items: Rahul to finalize pricing by Friday, Aditi to connect with vendor by tomorrow. Note: legal approval is delayed — escalate if needed. Investor update required by Monday.
-
----
-
-## Architecture
-
-```
-User Input (transcript/notes)
-        │
-        ▼
-   Next.js Frontend
-        │
-        ▼
-  Claude API (claude-sonnet-4-6)
-        │
-    Returns JSON:
-    - summary
-    - tasks[]
-    - risks[]
-    - email_draft
-        │
-        ▼
-  Display Output Cards
-        │
-        ▼
-  "Generate Report" → Genspark
-  (opens with pre-filled prompt)
-```
-
----
-
-## Tech Stack
-
-| Layer | Choice |
-|-------|--------|
-| Frontend | Next.js + Tailwind CSS |
-| AI | Claude API (`claude-sonnet-4-6`) |
-| Reports | Genspark.ai |
-| Deploy | Vercel |
-
----
-
-## Claude Prompt
-
-```
-Analyze this internal meeting transcript or team conversation.
-
-Return a JSON object with:
-1. summary: 2-3 sentence overview
-2. tasks: array of { owner, task, deadline }
-3. risks: array of blockers or missed items
-4. email_draft: short follow-up email to the team
-
-Keep everything concise. If information is missing, flag it.
-
-Transcript:
-{{transcript}}
-```
-
----
-
-## Genspark Integration
-
-After Claude returns the structured data, clicking **"Generate Report"** opens Genspark with a pre-filled prompt:
-
-```
-Create an executive team update document from this meeting summary:
-
-{{summary}}
-
-Tasks:
-{{tasks}}
-
-Risks:
-{{risks}}
-
-Format as a clean project tracker with sections for this week's progress, action items, and blockers.
-```
-
----
-
-## MVP File Structure
-
-```
-/
-├── app/
-│   ├── page.tsx          # Main single-page UI
-│   └── api/
-│       └── analyze/
-│           └── route.ts  # Claude API call
-├── components/
-│   ├── TranscriptInput.tsx
-│   ├── OutputCards.tsx
-│   └── GensparkButton.tsx
-├── lib/
-│   └── claude.ts         # Claude client + prompt
-└── README.md
-```
+> Team, here are today's action items: Rahul to finalize pricing by Friday, Aditi to connect with vendor by tomorrow. Note: legal approval is delayed — escalate if needed.
 
 ---
 
@@ -167,12 +68,87 @@ cd push-to-prod
 # 2. Install dependencies
 npm install
 
-# 3. Add your API key
-echo "ANTHROPIC_API_KEY=your_key_here" > .env.local
+# 3. Set your API key
+cp .env.local.example .env.local
+# Edit .env.local and add your ANTHROPIC_API_KEY
 
 # 4. Run locally
 npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `ANTHROPIC_API_KEY` | Yes | Your key from [console.anthropic.com](https://console.anthropic.com) |
+
+---
+
+## File Structure
+
+```
+/
+├── app/
+│   ├── layout.tsx              # Root layout + page metadata
+│   ├── page.tsx                # Main single-page UI (state management)
+│   ├── globals.css             # Tailwind CSS import
+│   └── api/
+│       └── analyze/
+│           └── route.ts        # POST /api/analyze → Claude API
+├── components/
+│   ├── TranscriptInput.tsx     # Textarea + submit button
+│   ├── OutputCards.tsx         # Summary / Tasks / Risks / Email cards
+│   └── GensparkButton.tsx      # Opens Genspark with pre-filled prompt
+├── lib/
+│   └── claude.ts               # Anthropic SDK client, AnalysisResult type
+├── .env.local.example          # API key template
+└── README.md
+```
+
+---
+
+## Architecture
+
+```
+User Input (transcript/notes)
+        │
+        ▼
+   Next.js Frontend (app/page.tsx)
+        │
+        ▼
+  POST /api/analyze (app/api/analyze/route.ts)
+        │
+        ▼
+  Claude API — claude-sonnet-4-6 (lib/claude.ts)
+        │
+    Returns JSON:
+    - summary
+    - tasks[]  { owner, task, deadline }
+    - risks[]
+    - email_draft
+        │
+        ▼
+  Output Cards (components/OutputCards.tsx)
+        │
+        ▼
+  "Generate Report" → Genspark (components/GensparkButton.tsx)
+  (opens new tab with pre-filled executive update prompt)
+```
+
+---
+
+## Tech Stack
+
+| Layer | Choice |
+|-------|--------|
+| Frontend | Next.js 15 + Tailwind CSS |
+| AI | Claude API (`claude-sonnet-4-6`) |
+| Reports | Genspark.ai |
+| Deploy | Vercel |
 
 ---
 
