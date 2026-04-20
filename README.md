@@ -8,7 +8,7 @@
 
 Inside every company:
 - Meetings happen constantly
-- People talk — a lot
+- People talk a lot
 - Nobody knows the next steps
 - Follow-ups get missed
 - Projects stall
@@ -24,15 +24,15 @@ Paste any internal communication — Slack thread, meeting notes, WhatsApp messa
 - Follow-up email draft
 
 **Genspark** handles the presentation:
-- Opens with a pre-filled executive update prompt
-- Clean project tracker doc, team update
+- Prompt-ready handoff into Genspark AI Docs / Super Agent
+- Clean project tracker doc, team update, or leadership memo
 
 ---
 
 ## Demo
 
 **Input:**
-```
+```text
 Rahul will finalize pricing by Friday.
 Aditi to talk to vendor.
 Delay in legal approval.
@@ -61,22 +61,25 @@ Need investor update Monday.
 ## Getting Started
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/veesesh/push-to-prod
 cd push-to-prod
-
-# 2. Install dependencies
 npm install
-
-# 3. Set your API key
 cp .env.local.example .env.local
-# Edit .env.local and add your ANTHROPIC_API_KEY
+```
 
-# 4. Run locally
+Add your `ANTHROPIC_API_KEY` to `.env.local`, then run:
+
+```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000)
+
+### Next.js 16 Note
+
+This repo explicitly sets `turbopack.root` in `next.config.ts` to `process.cwd()`.
+
+That avoids a Next.js 16 workspace-root detection issue when multiple lockfiles exist above this app, which can otherwise break module resolution during local development.
 
 ---
 
@@ -88,24 +91,77 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
+## Genspark Integration
+
+This repo now uses a prompt-based Genspark handoff instead of relying on an undocumented deep link.
+
+### Why
+
+Based on Genspark's public help center and product pages, the stable documented workflow is:
+
+- Open the Genspark workspace
+- Start in **AI Docs** or **Super Agent**
+- Paste a detailed prompt
+
+That is the integration this app supports directly.
+
+### Current Flow
+
+1. User pastes a transcript into MeetingMind
+2. Claude returns:
+   - summary
+   - task list
+   - blockers / risks
+   - follow-up email draft
+3. MeetingMind builds a polished Genspark brief
+4. User clicks `Open Genspark`
+5. The brief is copied to clipboard and pasted into Genspark
+
+### Where The Logic Lives
+
+- `lib/genspark.ts`
+  Builds the structured prompt sent to Genspark
+- `components/GensparkButton.tsx`
+  Handles copy-to-clipboard + open-workspace UX
+
+### Recommended Prompt Target In Genspark
+
+- **AI Docs** for a formatted status report or leadership memo
+- **Super Agent** for a broader workspace task like "turn this into a board update and refine the layout"
+
+### If Genspark Ships A Public API Later
+
+Replace the current prompt handoff with:
+
+1. A new server route such as `app/api/genspark/route.ts`
+2. Secret storage for Genspark credentials in `.env.local`
+3. A POST from the frontend to your server route
+4. Server-side creation of docs/reports
+5. Returning a report URL or report ID back to the UI
+
+Until Genspark publishes an official API contract for this workflow, the clipboard + workspace handoff is the lowest-risk integration path.
+
+---
+
 ## File Structure
 
-```
+```text
 /
 ├── app/
-│   ├── layout.tsx              # Root layout + page metadata
-│   ├── page.tsx                # Main single-page UI (state management)
-│   ├── globals.css             # Tailwind CSS import
+│   ├── layout.tsx
+│   ├── page.tsx
+│   ├── globals.css
 │   └── api/
 │       └── analyze/
-│           └── route.ts        # POST /api/analyze → Claude API
+│           └── route.ts
 ├── components/
-│   ├── TranscriptInput.tsx     # Textarea + submit button
-│   ├── OutputCards.tsx         # Summary / Tasks / Risks / Email cards
-│   └── GensparkButton.tsx      # Opens Genspark with pre-filled prompt
+│   ├── TranscriptInput.tsx
+│   ├── OutputCards.tsx
+│   └── GensparkButton.tsx
 ├── lib/
-│   └── claude.ts               # Anthropic SDK client, AnalysisResult type
-├── .env.local.example          # API key template
+│   ├── claude.ts
+│   └── genspark.ts
+├── .env.local.example
 └── README.md
 ```
 
@@ -113,7 +169,7 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Architecture
 
-```
+```text
 User Input (transcript/notes)
         │
         ▼
@@ -135,8 +191,10 @@ User Input (transcript/notes)
   Output Cards (components/OutputCards.tsx)
         │
         ▼
-  "Generate Report" → Genspark (components/GensparkButton.tsx)
-  (opens new tab with pre-filled executive update prompt)
+  Genspark Prompt Builder (lib/genspark.ts)
+        │
+        ▼
+  Open Genspark + paste prompt
 ```
 
 ---
@@ -145,7 +203,7 @@ User Input (transcript/notes)
 
 | Layer | Choice |
 |-------|--------|
-| Frontend | Next.js 15 + Tailwind CSS |
+| Frontend | Next.js 16 + Tailwind CSS 4 |
 | AI | Claude API (`claude-sonnet-4-6`) |
 | Reports | Genspark.ai |
 | Deploy | Vercel |
@@ -155,16 +213,16 @@ User Input (transcript/notes)
 ## Roadmap
 
 - [ ] Slack OAuth — auto-import channel threads
-- [ ] Recurring weekly digest (cron-triggered Claude call)
+- [ ] Recurring weekly digest
 - [ ] Direct Notion/Linear task creation
 - [ ] Team dashboard with history
-- [ ] Genspark API integration (when available)
+- [ ] Direct Genspark API integration, if and when an official API is published
 
 ---
 
 ## Built With
 
-- [Claude API](https://docs.anthropic.com) — Anthropic's claude-sonnet-4-6
-- [Genspark](https://www.genspark.ai) — AI-generated reports and docs
+- [Claude API](https://docs.anthropic.com)
+- [Genspark](https://www.genspark.ai)
 - [Next.js](https://nextjs.org)
 - [Tailwind CSS](https://tailwindcss.com)

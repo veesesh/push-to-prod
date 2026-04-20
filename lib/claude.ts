@@ -2,16 +2,92 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic();
 
+export interface ActionItem {
+  owner: string;
+  task: string;
+  deadline: string;
+}
+
 export interface AnalysisResult {
   summary: string;
-  tasks: { owner: string; task: string; deadline: string }[];
+  tasks: ActionItem[];
   risks: string[];
   email_draft: string;
 }
 
-const SYSTEM_PROMPT = `You are an expert meeting analyst. Always respond with valid JSON only — no markdown, no code fences, no explanation. Return exactly the structure requested.`;
+const SYSTEM_PROMPT = `You are an expert meeting analyst for fast-moving startup teams.
+Return valid JSON only. No markdown. No code fences. No prose before or after the JSON.
+
+Output schema:
+{
+  "summary": string,
+  "tasks": [{ "owner": string, "task": string, "deadline": string }],
+  "risks": string[],
+  "email_draft": string
+}
+
+Rules:
+- Keep the summary to 2-3 sentences.
+- Extract only concrete actions.
+- If an owner is missing, use "Unassigned".
+- If a deadline is missing, use "No clear deadline".
+- Risks should be crisp and decision-useful.
+- The email draft should be short, professional, and ready to send.`;
+
+function normalizeResult(payload: unknown): AnalysisResult {
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Claude returned an invalid payload.");
+  }
+
+  const candidate = payload as Partial<AnalysisResult>;
+  const tasks = Array.isArray(candidate.tasks) ? candidate.tasks : [];
+  const risks = Array.isArray(candidate.risks) ? candidate.risks : [];
+
+  return {
+    summary:
+      typeof candidate.summary === "string" && candidate.summary.trim()
+        ? candidate.summary.trim()
+        : "No summary generated.",
+    tasks: tasks
+      .map((task) => {
+        if (!task || typeof task !== "object") {
+          return null;
+        }
+
+        const item = task as Partial<ActionItem>;
+
+        return {
+          owner:
+            typeof item.owner === "string" && item.owner.trim()
+              ? item.owner.trim()
+              : "Unassigned",
+          task:
+            typeof item.task === "string" && item.task.trim()
+              ? item.task.trim()
+              : "Follow up required",
+          deadline:
+            typeof item.deadline === "string" && item.deadline.trim()
+              ? item.deadline.trim()
+              : "No clear deadline",
+        };
+      })
+      .filter((task): task is ActionItem => task !== null),
+    risks: risks
+      .filter((risk): risk is string => typeof risk === "string")
+      .map((risk) => risk.trim())
+      .filter(Boolean),
+    email_draft:
+      typeof candidate.email_draft === "string" && candidate.email_draft.trim()
+        ? candidate.email_draft.trim()
+        : "Team, sharing the latest action items and blockers from today's discussion.",
+  };
+}
 
 export async function analyzeTranscript(transcript: string): Promise<AnalysisResult> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("Missing ANTHROPIC_API_KEY in .env.local");
+  }
+
   const response = await client.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 2048,
@@ -35,10 +111,10 @@ ${transcript}`,
     ],
   });
 
-  const textBlock = response.content.find((b) => b.type === "text");
+  const textBlock = response.content.find((block) => block.type === "text");
   if (!textBlock || textBlock.type !== "text") {
     throw new Error("No text content in Claude response");
   }
 
-  return JSON.parse(textBlock.text) as AnalysisResult;
+  return normalizeResult(JSON.parse(textBlock.text));
 }

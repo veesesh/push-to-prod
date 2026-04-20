@@ -13,9 +13,9 @@ export default function Home() {
 
   const handleSubmit = async () => {
     if (!transcript.trim()) return;
+
     setLoading(true);
     setError(null);
-    setResult(null);
 
     try {
       const res = await fetch("/api/analyze", {
@@ -28,9 +28,10 @@ export default function Home() {
 
       if (!res.ok) {
         setError(data.error || "Something went wrong.");
-      } else {
-        setResult(data as AnalysisResult);
+        return;
       }
+
+      setResult(data as AnalysisResult);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -39,36 +40,87 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold text-gray-900">MeetingMind</h1>
-          <p className="mt-2 text-gray-500 text-sm">
-            Turn messy transcripts into clear action plans — powered by Claude + Genspark.
-          </p>
+    <main className="min-h-screen overflow-x-hidden bg-[radial-gradient(circle_at_top_left,_rgba(125,211,252,0.35),_transparent_28%),radial-gradient(circle_at_top_right,_rgba(253,224,71,0.28),_transparent_22%),linear-gradient(180deg,_#f8fafc_0%,_#eef2ff_46%,_#f8fafc_100%)]">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <section className="heroShell reveal">
+          <div className="max-w-3xl">
+            <p className="eyebrow">MeetingMind</p>
+            <h1 className="mt-4 max-w-4xl text-5xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-6xl">
+              Turn scattered meeting talk into a crisp update, owner list, and next-step plan.
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-slate-600 sm:text-lg">
+              Drop in call notes, Slack threads, or messy transcripts. MeetingMind pulls out the
+              decisions, owners, deadlines, and blockers, then packages the output for a polished
+              Genspark handoff.
+            </p>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
+            <span className="pillTag reveal reveal-delay-1">Built for ops, founders, and PMs</span>
+            <span className="pillTag reveal reveal-delay-2">Structured by Claude</span>
+            <span className="pillTag reveal reveal-delay-3">Finished in Genspark</span>
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="softCard reveal reveal-delay-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-700">
+                Step 1
+              </p>
+              <p className="mt-3 text-lg font-medium text-slate-950">Drop in the raw conversation</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Use board-call notes, Slack backscroll, Zoom transcripts, or a rough internal recap.
+              </p>
+            </div>
+            <div className="softCard reveal reveal-delay-2">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber-700">
+                Step 2
+              </p>
+              <p className="mt-3 text-lg font-medium text-slate-950">Extract the operational signal</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Get a clean summary, accountable owners, due dates, and the unresolved issues that still need attention.
+              </p>
+            </div>
+            <div className="softCard reveal reveal-delay-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
+                Step 3
+              </p>
+              <p className="mt-3 text-lg font-medium text-slate-950">Turn it into a leadership-ready artifact</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Open Genspark with the brief copied and shape it into a memo, tracker, or status update.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <div className="mt-8 reveal reveal-delay-2">
+          <TranscriptInput
+            value={transcript}
+            onChange={setTranscript}
+            onSubmit={handleSubmit}
+            loading={loading}
+            onUseSample={setTranscript}
+            onClear={() => {
+              setTranscript("");
+              setResult(null);
+              setError(null);
+            }}
+          />
         </div>
 
-        <TranscriptInput
-          value={transcript}
-          onChange={setTranscript}
-          onSubmit={handleSubmit}
-          loading={loading}
-        />
-
         {loading && (
-          <div className="mt-8 text-center text-sm text-gray-400">
-            Claude is analyzing your transcript...
+          <div className="mt-6 panel reveal p-5 text-sm text-slate-600">
+            Claude is separating signal from noise and drafting a structured action plan.
           </div>
         )}
 
         {error && (
-          <div className="mt-6 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+          <div className="mt-6 reveal rounded-[28px] border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
             {error}
           </div>
         )}
 
         {result && (
-          <div className="mt-8">
+          <div className="mt-8 reveal reveal-delay-3">
             <OutputCards result={result} />
           </div>
         )}

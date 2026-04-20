@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MeetingMind — AI Action Plan Generator",
+  title: "MeetingMind — Meeting Notes To Clear Execution",
   description:
-    "Turn messy meeting transcripts into clear tasks, owners, and exec reports — powered by Claude + Genspark.",
+    "Turn messy transcripts into clear action items, blockers, and leadership-ready updates with Claude and Genspark.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased">{children}</body>
+      <body>{children}</body>
     </html>
   );
 }

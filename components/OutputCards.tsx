@@ -10,70 +10,91 @@ interface Props {
 export default function OutputCards({ result }: Props) {
   return (
     <div className="flex flex-col gap-6">
-      {/* Summary */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-indigo-600 mb-2">
-          Summary
-        </h2>
-        <p className="text-gray-700 text-sm leading-relaxed">{result.summary}</p>
+      <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
+        <div className="panel p-6 sm:p-7">
+          <p className="eyebrow">Executive Readout</p>
+          <p className="mt-3 text-base leading-8 text-slate-700">{result.summary}</p>
+        </div>
+
+        <div className="panel p-6 sm:p-7">
+          <p className="eyebrow">At A Glance</p>
+          <div className="mt-4 grid gap-3">
+            <div className="softCard">
+              <p className="text-3xl font-semibold text-slate-950">{result.tasks.length}</p>
+              <p className="mt-1 text-sm text-slate-600">Concrete actions captured</p>
+            </div>
+            <div className="softCard">
+              <p className="text-3xl font-semibold text-slate-950">{result.risks.length}</p>
+              <p className="mt-1 text-sm text-slate-600">Blockers or risks surfaced</p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Tasks */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-indigo-600 mb-4">
-          Action Items
-        </h2>
+      <div className="panel overflow-hidden p-0">
+        <div className="border-b border-slate-200 px-6 py-5 sm:px-7">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-700">
+            Action Items
+          </h2>
+        </div>
         {result.tasks.length === 0 ? (
-          <p className="text-gray-400 text-sm">No tasks identified.</p>
+          <p className="px-6 py-6 text-sm text-slate-500 sm:px-7">No tasks identified.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="text-left text-gray-400 border-b border-gray-100">
-                <th className="pb-2 font-medium">Owner</th>
-                <th className="pb-2 font-medium">Task</th>
-                <th className="pb-2 font-medium">Deadline</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.tasks.map((task, i) => (
-                <tr key={i} className="border-b border-gray-50 last:border-0">
-                  <td className="py-2 pr-4 font-medium text-gray-800">{task.owner}</td>
-                  <td className="py-2 pr-4 text-gray-700">{task.task}</td>
-                  <td className="py-2 text-gray-500">{task.deadline}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="border-b border-slate-200 bg-slate-50 text-left text-slate-500">
+                  <th className="px-6 py-3 font-medium sm:px-7">Owner</th>
+                  <th className="px-6 py-3 font-medium">Task</th>
+                  <th className="px-6 py-3 font-medium sm:px-7">Deadline</th>
                 </tr>
+              </thead>
+              <tbody>
+                {result.tasks.map((task, i) => (
+                  <tr
+                    key={`${task.owner}-${task.task}-${i}`}
+                    className="border-b border-slate-100 last:border-0"
+                  >
+                    <td className="px-6 py-4 font-medium text-slate-900 sm:px-7">{task.owner}</td>
+                    <td className="px-6 py-4 text-slate-700">{task.task}</td>
+                    <td className="px-6 py-4 text-slate-500 sm:px-7">{task.deadline}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="panel p-6 sm:p-7">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-600">
+            Risks & Blockers
+          </h2>
+          {result.risks.length === 0 ? (
+            <p className="mt-4 text-sm text-slate-500">No material blockers were detected.</p>
+          ) : (
+            <ul className="mt-4 space-y-3">
+              {result.risks.map((risk, i) => (
+                <li key={`${risk}-${i}`} className="softCard flex items-start gap-3">
+                  <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-rose-100 text-xs font-semibold text-rose-700">
+                    !
+                  </span>
+                  <span className="text-sm leading-6 text-slate-700">{risk}</span>
+                </li>
               ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+            </ul>
+          )}
+        </div>
 
-      {/* Risks */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-red-500 mb-3">
-          Risks & Blockers
-        </h2>
-        {result.risks.length === 0 ? (
-          <p className="text-gray-400 text-sm">No risks identified.</p>
-        ) : (
-          <ul className="space-y-2">
-            {result.risks.map((risk, i) => (
-              <li key={i} className="flex gap-2 text-sm text-gray-700">
-                <span className="text-red-400 mt-0.5">⚠</span>
-                {risk}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Follow-up Email */}
-      <div className="rounded-xl border border-gray-200 bg-white p-6">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
-          Follow-up Email Draft
-        </h2>
-        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-          {result.email_draft}
-        </p>
+        <div className="panel p-6 sm:p-7">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+            Follow-up Note
+          </h2>
+          <p className="mt-4 whitespace-pre-wrap text-sm leading-7 text-slate-700">
+            {result.email_draft}
+          </p>
+        </div>
       </div>
 
       <GensparkButton result={result} />
