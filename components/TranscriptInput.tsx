@@ -1,5 +1,7 @@
 "use client";
 
+import { MAX_TRANSCRIPT_CHARACTERS } from "@/lib/limits";
+
 interface Props {
   value: string;
   onChange: (val: string) => void;
@@ -23,6 +25,9 @@ export default function TranscriptInput({
   onUseSample,
   onClear,
 }: Props) {
+  const trimmedLength = value.trim().length;
+  const isTooLong = trimmedLength > MAX_TRANSCRIPT_CHARACTERS;
+
   return (
     <section className="panel p-6 sm:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -52,18 +57,21 @@ export default function TranscriptInput({
           placeholder="Paste the meeting transcript, internal thread, or note dump here..."
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          maxLength={MAX_TRANSCRIPT_CHARACTERS + 1000}
           disabled={loading}
         />
       </div>
 
       <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
-          {value.trim().length === 0 ? "No transcript loaded" : `${value.trim().length} characters`}
+        <p className={`text-xs uppercase tracking-[0.24em] ${isTooLong ? "text-rose-500" : "text-slate-400"}`}>
+          {trimmedLength === 0
+            ? "No transcript loaded"
+            : `${trimmedLength.toLocaleString()} / ${MAX_TRANSCRIPT_CHARACTERS.toLocaleString()} characters`}
         </p>
 
         <button
           onClick={onSubmit}
-          disabled={loading || value.trim().length === 0}
+          disabled={loading || trimmedLength === 0 || isTooLong}
           className="primaryButton sm:min-w-60"
         >
           {loading ? "Building action plan..." : "Extract action plan"}

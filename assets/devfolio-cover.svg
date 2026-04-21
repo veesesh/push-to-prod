@@ -1,0 +1,66 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#F8FAFC"/>
+  <circle cx="188" cy="164" r="220" fill="#BAE6FD" fill-opacity="0.7"/>
+  <circle cx="1440" cy="130" r="180" fill="#FDE68A" fill-opacity="0.72"/>
+  <circle cx="1360" cy="760" r="220" fill="#BBF7D0" fill-opacity="0.6"/>
+  <rect x="80" y="90" width="1440" height="720" rx="40" fill="white" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="136" y="206" fill="#0F172A" font-family="Avenir Next, Segoe UI, sans-serif" font-size="54" font-weight="700">
+    MeetingMind
+  </text>
+  <text x="136" y="268" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="26">
+    Turn scattered meeting talk into a crisp update, owner list, and next-step plan.
+  </text>
+  <rect x="136" y="332" width="410" height="352" rx="28" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="172" y="388" fill="#0369A1" font-family="Avenir Next, Segoe UI, sans-serif" font-size="18" font-weight="700">
+    INPUT
+  </text>
+  <text x="172" y="432" fill="#0F172A" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34" font-weight="600">
+    Raw transcript
+  </text>
+  <text x="172" y="486" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Slack threads
+  </text>
+  <text x="172" y="522" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Meeting notes
+  </text>
+  <text x="172" y="558" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Zoom transcripts
+  </text>
+  <rect x="594" y="240" width="412" height="418" rx="28" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="630" y="296" fill="#B45309" font-family="Avenir Next, Segoe UI, sans-serif" font-size="18" font-weight="700">
+    CLAUDE
+  </text>
+  <text x="630" y="340" fill="#0F172A" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34" font-weight="600">
+    Extract the signal
+  </text>
+  <text x="630" y="394" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Summary
+  </text>
+  <text x="630" y="430" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Owners and deadlines
+  </text>
+  <text x="630" y="466" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Risks and blockers
+  </text>
+  <text x="630" y="502" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Follow-up email draft
+  </text>
+  <rect x="1054" y="332" width="408" height="352" rx="28" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <text x="1090" y="388" fill="#047857" font-family="Avenir Next, Segoe UI, sans-serif" font-size="18" font-weight="700">
+    GENSPARK
+  </text>
+  <text x="1090" y="432" fill="#0F172A" font-family="Avenir Next, Segoe UI, sans-serif" font-size="34" font-weight="600">
+    Finish the artifact
+  </text>
+  <text x="1090" y="486" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Leadership memo
+  </text>
+  <text x="1090" y="522" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Status report
+  </text>
+  <text x="1090" y="558" fill="#475569" font-family="Avenir Next, Segoe UI, sans-serif" font-size="22">
+    Project tracker
+  </text>
+  <path d="M546 448H594" stroke="#38BDF8" stroke-width="12" stroke-linecap="round"/>
+  <path d="M1006 448H1054" stroke="#F59E0B" stroke-width="12" stroke-linecap="round"/>
+</svg>

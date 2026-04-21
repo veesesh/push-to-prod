@@ -24,6 +24,7 @@ Paste any internal communication — Slack thread, meeting notes, WhatsApp messa
 - Action items with owners + deadlines
 - Blockers & risks
 - Follow-up email draft
+- Server-side schema normalization and JSON recovery
 
 **Genspark** handles the presentation:
 - Prompt-ready handoff into Genspark AI Docs / Super Agent
@@ -92,6 +93,13 @@ That avoids a Next.js 16 workspace-root detection issue when multiple lockfiles 
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `ANTHROPIC_API_KEY` | Yes | Your key from [console.anthropic.com](https://console.anthropic.com) |
+
+## Reliability Notes
+
+- Transcript input is capped at 12,000 characters in both the browser and API route.
+- Claude output is parsed as JSON, then normalized before rendering so missing owners, deadlines, tasks, or risks do not break the UI.
+- If Claude accidentally wraps JSON in extra text, the server extracts the JSON object before validation.
+- Clipboard access can fail in locked-down browsers, so the Genspark brief can also be downloaded as a `.txt` file.
 
 ---
 
@@ -167,7 +175,12 @@ Until Genspark publishes an official API, the clipboard + download handoff is th
 │   └── GensparkButton.tsx
 ├── lib/
 │   ├── claude.ts
+│   ├── limits.ts
 │   └── genspark.ts
+├── assets/
+│   ├── devfolio-logo.svg
+│   ├── devfolio-cover.svg
+│   └── devfolio-architecture.svg
 ├── .env.local.example
 └── README.md
 ```
@@ -180,10 +193,14 @@ Until Genspark publishes an official API, the clipboard + download handoff is th
 User Input (transcript/notes)
         │
         ▼
-   Next.js Frontend (app/page.tsx)
+  Next.js Frontend (app/page.tsx)
+        │
+  Browser limit: 12,000 chars
         │
         ▼
   POST /api/analyze (app/api/analyze/route.ts)
+        │
+ Server validation + size guard
         │
         ▼
   Claude API — claude-sonnet-4-6 (lib/claude.ts)

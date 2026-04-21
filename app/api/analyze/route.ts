@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeTranscript } from "@/lib/claude";
+import { MAX_TRANSCRIPT_CHARACTERS } from "@/lib/limits";
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,6 +9,13 @@ export async function POST(req: NextRequest) {
 
     if (!transcript || transcript.trim().length === 0) {
       return NextResponse.json({ error: "Transcript is required." }, { status: 400 });
+    }
+
+    if (transcript.trim().length > MAX_TRANSCRIPT_CHARACTERS) {
+      return NextResponse.json(
+        { error: `Transcript must be ${MAX_TRANSCRIPT_CHARACTERS.toLocaleString()} characters or fewer.` },
+        { status: 413 }
+      );
     }
 
     const result = await analyzeTranscript(transcript);

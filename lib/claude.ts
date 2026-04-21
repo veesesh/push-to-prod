@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { MAX_TRANSCRIPT_CHARACTERS } from "@/lib/limits";
 
 const client = new Anthropic();
 
@@ -83,9 +84,28 @@ function normalizeResult(payload: unknown): AnalysisResult {
   };
 }
 
+function parseClaudeJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+
+    if (start === -1 || end === -1 || end <= start) {
+      throw new Error("Claude returned text that was not valid JSON.");
+    }
+
+    return JSON.parse(text.slice(start, end + 1));
+  }
+}
+
 export async function analyzeTranscript(transcript: string): Promise<AnalysisResult> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error("Missing ANTHROPIC_API_KEY in .env.local");
+  }
+
+  if (transcript.trim().length > MAX_TRANSCRIPT_CHARACTERS) {
+    throw new Error(`Transcript must be ${MAX_TRANSCRIPT_CHARACTERS.toLocaleString()} characters or fewer.`);
   }
 
   const response = await client.messages.create({
@@ -116,5 +136,5 @@ ${transcript}`,
     throw new Error("No text content in Claude response");
   }
 
-  return normalizeResult(JSON.parse(textBlock.text));
+  return normalizeResult(parseClaudeJson(textBlock.text));
 }
