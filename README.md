@@ -2,6 +2,8 @@
 
 > Turn messy meeting transcripts into clear tasks, owners, and exec reports — powered by Claude + Genspark.
 
+**Live:** [push-to-prod-beta.vercel.app](https://push-to-prod-beta.vercel.app)
+
 ---
 
 ## The Problem
