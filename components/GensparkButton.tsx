@@ -2,10 +2,24 @@
 
 import { useState } from "react";
 import { AnalysisResult } from "@/lib/claude";
-import { buildGensparkPrompt, GENSPARK_HOME_URL } from "@/lib/genspark";
+import {
+  buildGensparkPrompt,
+  GENSPARK_AI_DOCS_URL,
+  GENSPARK_SUPER_AGENT_URL,
+} from "@/lib/genspark";
 
 interface Props {
   result: AnalysisResult;
+}
+
+function downloadPrompt(prompt: string) {
+  const blob = new Blob([prompt], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "meetingmind-brief.txt";
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 export default function GensparkButton({ result }: Props) {
@@ -13,27 +27,39 @@ export default function GensparkButton({ result }: Props) {
   const [copyError, setCopyError] = useState<string | null>(null);
   const prompt = buildGensparkPrompt(result);
 
-  const handleCopy = async () => {
+  const copyToClipboard = async (): Promise<boolean> => {
     try {
       await navigator.clipboard.writeText(prompt);
       setCopyError(null);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1800);
+      return true;
     } catch {
-      setCopied(false);
-      setCopyError("Clipboard access failed. Copy the prompt from the panel below.");
+      setCopyError(
+        "Clipboard access was blocked. Use the download button to save the brief, then paste it into Genspark."
+      );
+      return false;
     }
   };
 
-  const handleOpen = () => {
-    navigator.clipboard
-      .writeText(prompt)
-      .then(() => setCopyError(null))
-      .catch(() => {
-        setCopied(false);
-        setCopyError("Genspark opened, but clipboard access was blocked. Copy the prompt below.");
-      });
-    window.open(GENSPARK_HOME_URL, "_blank", "noopener,noreferrer");
+  const handleCopy = async () => {
+    const ok = await copyToClipboard();
+    if (ok) {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    }
+  };
+
+  const handleOpenDocs = async () => {
+    await copyToClipboard();
+    window.open(GENSPARK_AI_DOCS_URL, "_blank", "noopener,noreferrer");
+  };
+
+  const handleOpenSuperAgent = async () => {
+    await copyToClipboard();
+    window.open(GENSPARK_SUPER_AGENT_URL, "_blank", "noopener,noreferrer");
+  };
+
+  const handleDownload = () => {
+    downloadPrompt(prompt);
   };
 
   return (
@@ -45,18 +71,35 @@ export default function GensparkButton({ result }: Props) {
             Move from analysis to a presentable deliverable
           </h3>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            The safest workflow is still prompt-first. MeetingMind prepares the brief, copies it,
-            and sends you into Genspark so the final output can be refined as a polished document.
+            MeetingMind prepares the brief and copies it to your clipboard. Open the Genspark
+            surface that matches what you need, then paste.
           </p>
         </div>
 
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-64">
-          <button type="button" onClick={handleOpen} className="primaryButton">
-            Open Genspark workspace
+          <button type="button" onClick={handleOpenDocs} className="primaryButton">
+            Open in AI Docs
           </button>
-          <button type="button" onClick={handleCopy} className="ghostButton w-full justify-center">
-            {copied ? "Copied brief" : "Copy handoff brief"}
+          <button type="button" onClick={handleOpenSuperAgent} className="ghostButton w-full justify-center">
+            Open in Super Agent
           </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="ghostButton flex-1 justify-center"
+            >
+              {copied ? "Copied" : "Copy brief"}
+            </button>
+            <button
+              type="button"
+              onClick={handleDownload}
+              className="ghostButton flex-1 justify-center"
+              title="Download brief as .txt"
+            >
+              Download
+            </button>
+          </div>
         </div>
       </div>
 
@@ -69,23 +112,26 @@ export default function GensparkButton({ result }: Props) {
       <div className="mt-6 grid gap-3 lg:grid-cols-3">
         <div className="softCard">
           <span className="stepBadge">1</span>
-          <p className="mt-3 text-sm font-medium text-slate-900">Start in AI Docs or Super Agent</p>
+          <p className="mt-3 text-sm font-medium text-slate-900">Choose your surface</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Use the workspace surface that matches the output you need: a memo, tracker, or leadership update.
+            <strong>AI Docs</strong> for a formatted memo or status report.{" "}
+            <strong>Super Agent</strong> for a broader deliverable like a board update.
           </p>
         </div>
         <div className="softCard">
           <span className="stepBadge">2</span>
-          <p className="mt-3 text-sm font-medium text-slate-900">Paste the prepared handoff brief</p>
+          <p className="mt-3 text-sm font-medium text-slate-900">Paste the prepared brief</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            It already includes summary, action items, blockers, and formatting guidance for an exec-ready artifact.
+            Already copied to your clipboard — includes summary, tasks, blockers, and formatting
+            guidance.
           </p>
         </div>
         <div className="softCard">
           <span className="stepBadge">3</span>
-          <p className="mt-3 text-sm font-medium text-slate-900">Refine the final presentation</p>
+          <p className="mt-3 text-sm font-medium text-slate-900">Refine the final output</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Ask Genspark for a board-ready memo, a cleaner tracker layout, or a more concise status readout.
+            Ask Genspark to tighten the layout, adjust the tone, or reformat for a specific
+            audience.
           </p>
         </div>
       </div>

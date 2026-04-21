@@ -38,4 +38,5 @@ ${result.email_draft}
 Make the output presentation-ready and concise.`;
 }
 
-export const GENSPARK_HOME_URL = "https://www.genspark.ai/";
+export const GENSPARK_AI_DOCS_URL = "https://www.genspark.ai/agents?type=docs_agent";
+export const GENSPARK_SUPER_AGENT_URL = "https://www.genspark.ai/agents";

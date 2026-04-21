@@ -116,32 +116,35 @@ That is the integration this app supports directly.
    - blockers / risks
    - follow-up email draft
 3. MeetingMind builds a polished Genspark brief
-4. User clicks `Open Genspark`
-5. The brief is copied to clipboard and pasted into Genspark
+4. User clicks **Open in AI Docs** or **Open in Super Agent**
+5. The brief is auto-copied to clipboard — paste it in Genspark
+6. If clipboard is blocked, the **Download** button saves the brief as a `.txt` file
 
 ### Where The Logic Lives
 
 - `lib/genspark.ts`
-  Builds the structured prompt sent to Genspark
+  Builds the structured prompt and exports the two destination URLs
 - `components/GensparkButton.tsx`
-  Handles copy-to-clipboard + open-workspace UX
+  Handles copy-to-clipboard, .txt download fallback, and opens the correct Genspark surface
 
-### Recommended Prompt Target In Genspark
+### Genspark Destination URLs
 
-- **AI Docs** for a formatted status report or leadership memo
-- **Super Agent** for a broader workspace task like "turn this into a board update and refine the layout"
+| Surface | URL | Best for |
+|---------|-----|----------|
+| AI Docs | `genspark.ai/agents?type=docs_agent` | Formatted memo, status report, leadership update |
+| Super Agent | `genspark.ai/agents` | Broader deliverable — board update, tracker, presentation |
 
 ### If Genspark Ships A Public API Later
 
 Replace the current prompt handoff with:
 
-1. A new server route such as `app/api/genspark/route.ts`
-2. Secret storage for Genspark credentials in `.env.local`
-3. A POST from the frontend to your server route
-4. Server-side creation of docs/reports
-5. Returning a report URL or report ID back to the UI
+1. A new server route at `app/api/genspark/route.ts`
+2. `GENSPARK_API_KEY` in `.env.local`
+3. A `POST` from the frontend to your server route
+4. Server-side doc/report creation
+5. Return a report URL back to the UI for a one-click open
 
-Until Genspark publishes an official API contract for this workflow, the clipboard + workspace handoff is the lowest-risk integration path.
+Until Genspark publishes an official API, the clipboard + download handoff is the stable path.
 
 ---
 
